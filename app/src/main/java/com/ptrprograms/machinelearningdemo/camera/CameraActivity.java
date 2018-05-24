@@ -46,12 +46,8 @@ public abstract class CameraActivity extends Activity implements ImageReader.OnI
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(getLayoutResId());
 
-        initViews();
-
         init();
     }
-
-    protected abstract void initViews();
 
     protected abstract int getLayoutResId();
 
