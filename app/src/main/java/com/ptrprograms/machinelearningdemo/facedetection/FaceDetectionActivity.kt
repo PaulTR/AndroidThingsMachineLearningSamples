@@ -10,16 +10,12 @@ import com.ptrprograms.machinelearningdemo.R
 import com.ptrprograms.machinelearningdemo.camera.CameraActivity
 import kotlinx.android.synthetic.main.activity_face_detection.*
 
-class FaceDetectionActivity : CameraActivity() {
-
-    override fun getLayoutResId(): Int {
-        return R.layout.activity_face_detection
-    }
+class FaceDetectionActivity(override val layoutResId: Int = R.layout.activity_face_detection) : CameraActivity() {
 
     override fun onImageAvailable(reader: ImageReader) {
         Log.e("Test", "image available")
         val image = reader.acquireNextImage()
-        runOnUiThread { face_overlay.setBitmap(convertImageToBitmap(image)) }
+        runOnUiThread { face_overlay.bitmap = convertImageToBitmap(image) }
         var rotation = 0
 
         try {
@@ -43,7 +39,7 @@ class FaceDetectionActivity : CameraActivity() {
         val result = detector.detectInImage(firebaseVisionImage)
                 .addOnSuccessListener { faces ->
                     Log.e("Test", "onsuccess")
-                    face_overlay.setFaceData(faces)
+                    face_overlay.faces = faces
                     face_overlay.invalidate()
                 }
                 .addOnFailureListener { Log.e("Test", "onfailure") }

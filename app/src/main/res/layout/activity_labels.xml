@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.ptrprograms.machinelearningdemo.MainActivity">
+
+    <ImageView
+        android:id="@+id/labels_camera_image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <TextView
+        android:id="@+id/labels_text"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="test"
+        android:layout_alignParentBottom="true"
+        android:textSize="36sp"
+        android:paddingLeft="20dp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"/>
+
+</RelativeLayout>

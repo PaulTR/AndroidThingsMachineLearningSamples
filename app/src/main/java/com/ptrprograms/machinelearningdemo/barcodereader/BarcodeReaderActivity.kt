@@ -11,11 +11,7 @@ import com.ptrprograms.machinelearningdemo.R
 import com.ptrprograms.machinelearningdemo.camera.CameraActivity
 import kotlinx.android.synthetic.main.activity_barcode.*
 
-class BarCodeReaderActivity : CameraActivity() {
-
-    override fun getLayoutResId(): Int {
-        return R.layout.activity_barcode
-    }
+class BarcodeReaderActivity(override val layoutResId: Int = R.layout.activity_barcode) : CameraActivity() {
 
     override fun onImageAvailable(reader: ImageReader) {
         val image = reader.acquireNextImage()
@@ -38,14 +34,13 @@ class BarCodeReaderActivity : CameraActivity() {
         val detector = FirebaseVision.getInstance()
                 .getVisionBarcodeDetector(options)
 
-        val result = detector
-                .detectInImage(firebaseVisionImage)
-                .addOnSuccessListener { firebaseVisionBarcodes ->
-                    Log.e("Test", "barcodes found: " + firebaseVisionBarcodes.size)
-                    barcode_overlay.barcodes = firebaseVisionBarcodes
-                    barcode_overlay.invalidate()
-                }
-                .addOnFailureListener { Log.e("Test", "failed to find barcodes") }
+        detector
+            .detectInImage(firebaseVisionImage)
+            .addOnSuccessListener { firebaseVisionBarcodes ->
+                barcode_overlay.barcodes = firebaseVisionBarcodes
+                barcode_overlay.invalidate()
+            }
+            .addOnFailureListener { Log.e("Test", "failed to find barcodes") }
 
         setReady(true)
         reader.close()

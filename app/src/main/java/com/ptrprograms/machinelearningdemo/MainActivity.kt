@@ -9,8 +9,9 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
 import com.ptrprograms.machinelearningdemo.TextRecognition.TextRecognitionActivity
-import com.ptrprograms.machinelearningdemo.barcodereader.BarCodeReaderActivity
+import com.ptrprograms.machinelearningdemo.barcodereader.BarcodeReaderActivity
 import com.ptrprograms.machinelearningdemo.facedetection.FaceDetectionActivity
+import com.ptrprograms.machinelearningdemo.labels.LabelsActivity
 
 import java.util.ArrayList
 
@@ -55,11 +56,12 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
                 startActivity(activityIntent)
             }
             "Barcode Reader" -> {
-                val activityIntent = Intent(applicationContext, BarCodeReaderActivity::class.java)
+                val activityIntent = Intent(applicationContext, BarcodeReaderActivity::class.java)
                 startActivity(activityIntent)
             }
             "Image Labeling" -> {
-
+                val activityIntent = Intent(applicationContext, LabelsActivity::class.java)
+                startActivity(activityIntent)
             }
             "Landmark Recognition" -> {
 

@@ -38,7 +38,9 @@
 
         <activity android:name=".facedetection.FaceDetectionActivity" />
 
-        <activity android:name=".barcodereader.BarCodeReaderActivity" />
+        <activity android:name=".barcodereader.BarcodeReaderActivity" />
+
+        <activity android:name=".labels.LabelsActivity" />
     </application>
 
 </manifest>
