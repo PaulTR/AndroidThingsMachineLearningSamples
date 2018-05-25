@@ -32,9 +32,13 @@ class TextRecognitionActivity(override val layoutResId: Int = R.layout.activity_
                 .addOnSuccessListener { firebaseVisionText ->
                     Log.e("Machine Learning", "success!")
 
+                    var blocks = ArrayList<String>()
                     for (block in firebaseVisionText.blocks) {
                         Log.e("Machine Learning", block.text)
+                        blocks.add(block.text)
                     }
+
+                    camera_text.setText(blocks.joinToString())
                 }
                 .addOnFailureListener { e -> Log.e("Machine Learning", "failure :( " + e.message) }
 

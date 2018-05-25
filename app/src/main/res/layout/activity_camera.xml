@@ -10,4 +10,15 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <TextView
+        android:id="@+id/camera_text"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:text="test"
+        android:layout_alignParentBottom="true"
+        android:textSize="36sp"
+        android:paddingLeft="20dp"
+        android:textColor="@android:color/white"
+        android:background="@color/colorPrimary"/>
+
 </RelativeLayout>

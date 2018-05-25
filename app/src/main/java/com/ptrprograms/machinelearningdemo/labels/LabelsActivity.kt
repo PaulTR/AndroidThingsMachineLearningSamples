@@ -7,16 +7,15 @@ import com.google.firebase.ml.vision.FirebaseVision
 import com.google.firebase.ml.vision.common.FirebaseVisionImage
 import com.ptrprograms.machinelearningdemo.R
 import com.ptrprograms.machinelearningdemo.camera.CameraActivity
-import kotlinx.android.synthetic.main.activity_labels.*
 import com.google.firebase.ml.vision.label.FirebaseVisionLabelDetectorOptions
+import kotlinx.android.synthetic.main.activity_camera.*
 
 
-
-class LabelsActivity(override val layoutResId: Int = R.layout.activity_labels) : CameraActivity() {
+class LabelsActivity(override val layoutResId: Int = R.layout.activity_camera) : CameraActivity() {
 
     override fun onImageAvailable(reader: ImageReader) {
         val image = reader.acquireNextImage()
-        runOnUiThread { labels_camera_image.setImageBitmap(convertImageToBitmap(image)) }
+        runOnUiThread { camera_image.setImageBitmap(convertImageToBitmap(image)) }
         var rotation = 0
 
         try {
@@ -43,7 +42,7 @@ class LabelsActivity(override val layoutResId: Int = R.layout.activity_labels) :
                         labels.add(label.label)
                     }
 
-                    labels_text.setText(labels.joinToString())
+                    camera_text.setText(labels.joinToString())
                 }
                 .addOnFailureListener { e -> Log.e("Machine Learning", "failure :( " + e.message) }
 
