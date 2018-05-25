@@ -14,7 +14,7 @@
         android:id="@+id/camera_text"
         android:layout_width="match_parent"
         android:layout_height="80dp"
-        android:text="test"
+        android:text="Press the A button"
         android:layout_alignParentBottom="true"
         android:textSize="36sp"
         android:paddingLeft="20dp"

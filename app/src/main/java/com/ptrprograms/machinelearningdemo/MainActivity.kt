@@ -8,10 +8,12 @@ import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.WindowManager
 import android.widget.Toast
+import com.google.android.gms.vision.face.Landmark
 import com.ptrprograms.machinelearningdemo.TextRecognition.TextRecognitionActivity
 import com.ptrprograms.machinelearningdemo.barcodereader.BarcodeReaderActivity
 import com.ptrprograms.machinelearningdemo.facedetection.FaceDetectionActivity
 import com.ptrprograms.machinelearningdemo.labels.LabelsActivity
+import com.ptrprograms.machinelearningdemo.landmarks.LandmarkDetectionActivity
 
 import java.util.ArrayList
 
@@ -64,7 +66,8 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
                 startActivity(activityIntent)
             }
             "Landmark Recognition" -> {
-
+                val activityIntent = Intent(applicationContext, LandmarkDetectionActivity::class.java)
+                startActivity(activityIntent)
             }
         }
     }

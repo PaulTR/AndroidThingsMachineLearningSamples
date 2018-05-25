@@ -41,6 +41,8 @@
         <activity android:name=".barcodereader.BarcodeReaderActivity" />
 
         <activity android:name=".labels.LabelsActivity" />
+
+        <activity android:name=".landmarks.LandmarkDetectionActivity" />
     </application>
 
 </manifest>
