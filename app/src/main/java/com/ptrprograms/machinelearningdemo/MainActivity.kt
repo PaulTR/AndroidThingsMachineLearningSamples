@@ -10,6 +10,7 @@ import android.view.WindowManager
 import android.widget.Toast
 import com.google.android.gms.vision.face.Landmark
 import com.ptrprograms.machinelearningdemo.TextRecognition.TextRecognitionActivity
+import com.ptrprograms.machinelearningdemo.assistant.AssistantActivity
 import com.ptrprograms.machinelearningdemo.barcodereader.BarcodeReaderActivity
 import com.ptrprograms.machinelearningdemo.facedetection.FaceDetectionActivity
 import com.ptrprograms.machinelearningdemo.labels.LabelsActivity
@@ -36,6 +37,7 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
         options.add("Image Labeling")
         options.add("Landmark Recognition")
         options.add("TensorFlow")
+        options.add("Assistant")
 
         recyclerView = findViewById(R.id.list)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -73,6 +75,10 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
             }
             "TensorFlow" -> {
                 val activityIntent = Intent(applicationContext, TensorFlowActivity::class.java)
+                startActivity(activityIntent)
+            }
+            "Assistant" -> {
+                val activityIntent = Intent(applicationContext, AssistantActivity::class.java)
                 startActivity(activityIntent)
             }
         }
