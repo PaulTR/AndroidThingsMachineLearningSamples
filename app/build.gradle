@@ -18,6 +18,16 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
+    sourceSets {
+        main {
+            assets.srcDirs = ['./assets']
+        }
+    }
+    aaptOptions {
+        noCompress "tflite"
+        noCompress "lite"
+    }
 }
 
 dependencies {
@@ -33,9 +43,10 @@ dependencies {
     implementation 'com.google.firebase:firebase-ml-vision:16.0.0'
     implementation 'com.google.firebase:firebase-ml-vision-image-label-model:15.0.0'
 
-
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+
+    implementation 'org.tensorflow:tensorflow-lite:0.1.7'
 
 }
 

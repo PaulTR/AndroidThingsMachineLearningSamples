@@ -14,6 +14,7 @@ import com.ptrprograms.machinelearningdemo.barcodereader.BarcodeReaderActivity
 import com.ptrprograms.machinelearningdemo.facedetection.FaceDetectionActivity
 import com.ptrprograms.machinelearningdemo.labels.LabelsActivity
 import com.ptrprograms.machinelearningdemo.landmarks.LandmarkDetectionActivity
+import com.ptrprograms.machinelearningdemo.tensorflow.TensorFlowActivity
 
 import java.util.ArrayList
 
@@ -34,6 +35,7 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
         options.add("Barcode Reader")
         options.add("Image Labeling")
         options.add("Landmark Recognition")
+        options.add("TensorFlow")
 
         recyclerView = findViewById(R.id.list)
         recyclerView.layoutManager = LinearLayoutManager(this)
@@ -67,6 +69,10 @@ class MainActivity : Activity(), MachineLearningRecyclerViewAdapter.ItemClickLis
             }
             "Landmark Recognition" -> {
                 val activityIntent = Intent(applicationContext, LandmarkDetectionActivity::class.java)
+                startActivity(activityIntent)
+            }
+            "TensorFlow" -> {
+                val activityIntent = Intent(applicationContext, TensorFlowActivity::class.java)
                 startActivity(activityIntent)
             }
         }

@@ -16,13 +16,12 @@ import android.util.Log
 import android.util.SparseIntArray
 import android.view.Surface
 import android.view.WindowManager
-
 import com.google.android.things.contrib.driver.button.Button
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat
 import com.google.firebase.ml.vision.common.FirebaseVisionImageMetadata
-
+import com.ptrprograms.machinelearningdemo.tensorflow.ImagePreprocessor
+import com.ptrprograms.machinelearningdemo.tensorflow.TensorFlowImageClassifier
 import java.io.IOException
-import java.nio.ByteBuffer
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class CameraActivity : Activity(), ImageReader.OnImageAvailableListener {
@@ -40,12 +39,19 @@ abstract class CameraActivity : Activity(), ImageReader.OnImageAvailableListener
     protected abstract val layoutResId: Int
 
     private val mInitializeOnBackground = Runnable {
+
+        initCustomObjects()
+
         mCameraHandler = CameraHandler.instance
         mCameraHandler!!.initializeCamera(this@CameraActivity,
                 PREVIEW_IMAGE_WIDTH, PREVIEW_IMAGE_HEIGHT, mBackgroundHandler!!,
                 this@CameraActivity)
 
         setReady(true)
+    }
+
+    open fun initCustomObjects() {
+
     }
 
     private val mBackgroundClickHandler = Runnable { mCameraHandler!!.takePicture() }
@@ -203,8 +209,8 @@ abstract class CameraActivity : Activity(), ImageReader.OnImageAvailableListener
 
     companion object {
 
-        private val PREVIEW_IMAGE_WIDTH = 3280
-        private val PREVIEW_IMAGE_HEIGHT = 2464
+        val PREVIEW_IMAGE_WIDTH = 3280
+        val PREVIEW_IMAGE_HEIGHT = 2464
 
         private val ORIENTATIONS = SparseIntArray()
 

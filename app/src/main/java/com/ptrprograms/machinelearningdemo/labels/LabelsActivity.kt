@@ -47,9 +47,7 @@ class LabelsActivity(override val layoutResId: Int = R.layout.activity_camera) :
                 .addOnFailureListener { e -> Log.e("Machine Learning", "failure :( " + e.message) }
 
         setReady(true)
-
         reader.close()
-
         resetCamera()
     }
 
