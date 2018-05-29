@@ -12,6 +12,7 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.util.Log;
 
+import com.google.android.things.contrib.driver.apa102.Apa102;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
 import com.google.assistant.embedded.v1alpha2.AssistConfig;
@@ -25,7 +26,9 @@ import com.google.assistant.embedded.v1alpha2.EmbeddedAssistantGrpc;
 import com.google.protobuf.ByteString;
 import com.ptrprograms.machinelearningdemo.R;
 
+import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
@@ -36,8 +39,12 @@ import io.grpc.ManagedChannelBuilder;
 import io.grpc.auth.MoreCallCredentials;
 import io.grpc.stub.StreamObserver;
 
+//TODO cleanup and kotlin-ize
+//TODO save volume in shared preference to persist across device restart
 public class AssistantActivity extends Activity implements Button.OnButtonEventListener {
     private static final String TAG = AssistantActivity.class.getSimpleName();
+
+    private static int mVolumePercentage = 100;
 
     // Peripheral and drivers constants.
     private static final int BUTTON_DEBOUNCE_DELAY_MS = 20;
@@ -52,10 +59,12 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     .setEncoding(ENCODING_INPUT)
                     .setSampleRateHertz(SAMPLE_RATE)
                     .build();
+
     private static final AudioOutConfig ASSISTANT_AUDIO_RESPONSE_CONFIG =
             AudioOutConfig.newBuilder()
                     .setEncoding(ENCODING_OUTPUT)
                     .setSampleRateHertz(SAMPLE_RATE)
+                    .setVolumePercentage(mVolumePercentage)
                     .build();
     private static final AudioFormat AUDIO_FORMAT_STEREO =
             new AudioFormat.Builder()
@@ -95,11 +104,53 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     if (value.getDialogStateOut() != null) {
                         mConversationState = value.getDialogStateOut().getConversationState();
                     }
+
+                    if (value.getDialogStateOut() != null) {
+                        int volume = value.getDialogStateOut().getVolumePercentage();
+                        if (volume > 0) {
+                            mVolumePercentage = volume;
+                            Log.e(TAG, "assistant volume changed: " + mVolumePercentage);
+                            mAudioTrack.setVolume(AudioTrack.getMaxVolume() * (mVolumePercentage / 100.0f));
+                        }
+                    }
+
                     if (value.getAudioOut() != null) {
                         final ByteBuffer audioData =
                                 ByteBuffer.wrap(value.getAudioOut().getAudioData().toByteArray());
                         Log.e(TAG, "converse audio size: " + audioData.remaining());
                         mAssistantResponses.add(audioData);
+                    }
+
+                    if (value.getDeviceAction() != null &&
+                            !value.getDeviceAction().getDeviceRequestJson().isEmpty()) {
+                        // Iterate through JSON object. This sucks, do it better with GSON for later use
+                        try {
+                            JSONObject deviceAction =
+                                    new JSONObject(value.getDeviceAction().getDeviceRequestJson());
+                            Log.e("Test", "json: " + deviceAction.toString());
+                            JSONArray inputs = deviceAction.getJSONArray("inputs");
+                            for (int i = 0; i < inputs.length(); i++) {
+                                if (inputs.getJSONObject(i).getString("intent")
+                                        .equals("action.devices.EXECUTE")) {
+                                    JSONArray commands = inputs.getJSONObject(i)
+                                            .getJSONObject("payload")
+                                            .getJSONArray("commands");
+                                    for (int j = 0; j < commands.length(); j++) {
+                                        JSONArray execution = commands.getJSONObject(j)
+                                                .getJSONArray("execution");
+                                        for (int k = 0; k < execution.length(); k++) {
+                                            String command = execution.getJSONObject(k)
+                                                    .getString("command");
+                                            JSONObject params = execution.getJSONObject(k)
+                                                    .optJSONObject("params");
+                                            handleDeviceAction(command, params);
+                                        }
+                                    }
+                                }
+                            }
+                        } catch (JSONException | IOException e) {
+                            e.printStackTrace();
+                        }
                     }
                 }
 
@@ -135,8 +186,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     private AudioTrack mAudioTrack;
     private AudioRecord mAudioRecord;
 
+
     // Hardware peripherals.
     private Button mButton;
+    private Button mBackButton;
+    private Apa102 mLEDStrip;
+
+    private int[] mRainbow = new int[7];
+    private int[] mLightsOff = new int[7];
 
     // Assistant Thread and Runnables implementing the push-to-talk functionality.
     private ByteString mConversationState = null;
@@ -169,6 +226,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mAssistantHandler.post(mStreamAssistantRequest);
         }
     };
+
     private Runnable mStreamAssistantRequest = new Runnable() {
         @Override
         public void run() {
@@ -187,6 +245,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mAssistantHandler.post(mStreamAssistantRequest);
         }
     };
+
     private Runnable mStopAssistantRequest = new Runnable() {
         @Override
         public void run() {
@@ -200,6 +259,7 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mAudioTrack.play();
         }
     };
+
     private Handler mMainHandler;
 
     @Override
@@ -217,6 +277,35 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mButton = RainbowHat.openButtonA();
             mButton.setDebounceDelay(BUTTON_DEBOUNCE_DELAY_MS);
             mButton.setOnButtonEventListener(this);
+
+            mBackButton = RainbowHat.openButtonC();
+            mBackButton.setOnButtonEventListener(new Button.OnButtonEventListener() {
+                @Override
+                public void onButtonEvent(Button button, boolean pressed) {
+                    cleanup();
+                    finish();
+                }
+            });
+
+            mLEDStrip = RainbowHat.openLedStrip();
+            mLEDStrip.setBrightness(1);
+
+            mRainbow[0] = 0xFF0000;
+            mRainbow[1] = 0xFFAB00;
+            mRainbow[2] = 0xFFFF00;
+            mRainbow[3] = 0x00FF00;
+            mRainbow[4] = 0x0000FF;
+            mRainbow[5] = 0x9933FF;
+            mRainbow[6] = 0x990099;
+
+            mLightsOff[0] = 0x000000;
+            mLightsOff[1] = 0x000000;
+            mLightsOff[2] = 0x000000;
+            mLightsOff[3] = 0x000000;
+            mLightsOff[4] = 0x000000;
+            mLightsOff[5] = 0x000000;
+            mLightsOff[6] = 0x000000;
+
         } catch( IOException e ) {
             return;
         }
@@ -263,10 +352,25 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         }
     }
 
+    public void handleDeviceAction(String command, JSONObject params)
+            throws JSONException, IOException {
+        if (command.equals("action.devices.commands.OnOff")) {
+            if( params.getJSONObject("on").equals("false") ) {
+                mLEDStrip.write(mLightsOff);
+            } else {
+                mLEDStrip.write(mRainbow);
+            }
+        }
+    }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
         Log.e(TAG, "destroying assistant demo");
+        cleanup();
+    }
+
+    private void cleanup() {
         if (mAudioRecord != null) {
             mAudioRecord.stop();
             mAudioRecord = null;
@@ -287,5 +391,21 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
 
         mAssistantHandler.post(() -> mAssistantHandler.removeCallbacks(mStreamAssistantRequest));
         mAssistantThread.quitSafely();
+
+        if( mBackButton != null ) {
+            try {
+                mBackButton.close();
+            } catch( IOException e ) {
+
+            }
+        }
+
+        if( mLEDStrip != null ) {
+            try {
+                mLEDStrip.close();
+            } catch( IOException e ) {
+
+            }
+        }
     }
 }

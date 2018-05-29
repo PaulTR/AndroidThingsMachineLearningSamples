@@ -17,7 +17,8 @@
 package com.ptrprograms.machinelearningdemo.assistant;
 
 public class MyDevice {
-    public static final String MODEL_ID = "ptr-machine-learning-demo-machinelearningdemo-dvuzw4";
-    public static final String INSTANCE_ID = "machine-learning-demo-instance-id";
+    public static final String MODEL_ID = "machine-learning-demo-cddf4-test1-y8z02x";
+    public static final String INSTANCE_ID = "ptr_instance_id";
     public static final String LANGUAGE_CODE = "en-US";
 }
+
