@@ -10,11 +10,13 @@ import android.media.MediaRecorder.AudioSource;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
+import android.os.Looper;
 import android.util.Log;
 
 import com.google.android.things.contrib.driver.apa102.Apa102;
 import com.google.android.things.contrib.driver.button.Button;
 import com.google.android.things.contrib.driver.rainbowhat.RainbowHat;
+import com.google.android.things.pio.Gpio;
 import com.google.assistant.embedded.v1alpha2.AssistConfig;
 import com.google.assistant.embedded.v1alpha2.AssistRequest;
 import com.google.assistant.embedded.v1alpha2.AssistResponse;
@@ -86,6 +88,10 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
                     .build();
     private static final int SAMPLE_BLOCK_SIZE = 1024;
     private int mOutputBufferSize;
+
+    private int RAINBOW_MAX_BRIGHTNESS = 1;
+
+    private Gpio mLed;
 
     // Google Assistant API constants.
     private static final String ASSISTANT_ENDPOINT = "embeddedassistant.googleapis.com";
@@ -288,7 +294,6 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             });
 
             mLEDStrip = RainbowHat.openLedStrip();
-            mLEDStrip.setBrightness(1);
 
             mRainbow[0] = 0xFF0000;
             mRainbow[1] = 0xFFAB00;
@@ -305,6 +310,8 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
             mLightsOff[4] = 0x000000;
             mLightsOff[5] = 0x000000;
             mLightsOff[6] = 0x000000;
+
+            mLed = RainbowHat.openLedGreen();
 
         } catch( IOException e ) {
             return;
@@ -355,12 +362,32 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void handleDeviceAction(String command, JSONObject params)
             throws JSONException, IOException {
         if (command.equals("action.devices.commands.OnOff")) {
-            if( params.get("on").equals(false) ) {
+            if( !params.getBoolean("on") ) {
                 Log.e("Test", "turn off");
                 mLEDStrip.write(mLightsOff);
+                mLEDStrip.setBrightness(0);
             } else {
                 Log.e("Test", "turn on");
                 mLEDStrip.write(mRainbow);
+                mLEDStrip.setBrightness(RAINBOW_MAX_BRIGHTNESS);
+            }
+        } else if (command.equals("com.example.commands.BlinkLight")) {
+            int delay = 1000;
+            int blinkCount = params.getInt("number");
+            String speed = params.getString("speed");
+            if (speed.equals("slowly")) {
+                delay = 2000;
+            } else if (speed.equals("quickly")) {
+                delay = 500;
+            }
+            for (int i = 0; i < blinkCount*2; i++) {
+                new Handler(Looper.getMainLooper()).postDelayed(() -> {
+                    try {
+                        mLed.setValue(!mLed.getValue());
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                }, i * delay);
             }
         }
     }
@@ -405,6 +432,14 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
         if( mLEDStrip != null ) {
             try {
                 mLEDStrip.close();
+            } catch( IOException e ) {
+
+            }
+        }
+
+        if( mLed != null ) {
+            try {
+                mLed.close();
             } catch( IOException e ) {
 
             }
