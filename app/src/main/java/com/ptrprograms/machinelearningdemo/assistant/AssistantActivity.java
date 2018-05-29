@@ -355,9 +355,11 @@ public class AssistantActivity extends Activity implements Button.OnButtonEventL
     public void handleDeviceAction(String command, JSONObject params)
             throws JSONException, IOException {
         if (command.equals("action.devices.commands.OnOff")) {
-            if( params.getJSONObject("on").equals("false") ) {
+            if( params.get("on").equals(false) ) {
+                Log.e("Test", "turn off");
                 mLEDStrip.write(mLightsOff);
             } else {
+                Log.e("Test", "turn on");
                 mLEDStrip.write(mRainbow);
             }
         }
